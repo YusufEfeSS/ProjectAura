@@ -11,11 +11,25 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Kaynak kodunu hazirla
-        run: |
-          if [ -f settings.gradle.kts ]; then
-            echo "PROJECT_DIR=." >> "$GITHUB_ENV"
-          else
-            ZIP=$(ls ./*.zip 2>/dev/null | head -n 1 || true)
-            if [ -z "$ZIP" ]; then
-              echo "::error::Depoda settings.gradle.kts veya ProjectAura.zip bulunamadi. ZIP dosyasini depo ana dizinine yukleyin."
-              exit 1
+        run: unzip -q -o ProjectAura.zip -d aura-src
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Debug APK derle
+        working-directory: aura-src
+        run: gradle assembleDebug --stacktrace --console=plain
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ProjectAura-debug-apk
+          path: aura-src/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
