@@ -1,0 +1,21 @@
+name: Build Aura APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kaynak kodunu hazirla
+        run: |
+          if [ -f settings.gradle.kts ]; then
+            echo "PROJECT_DIR=." >> "$GITHUB_ENV"
+          else
+            ZIP=$(ls ./*.zip 2>/dev/null | head -n 1 || true)
+            if [ -z "$ZIP" ]; then
+              echo "::error::Depoda settings.gradle.kts veya ProjectAura.zip bulunamadi. ZIP dosyasini depo ana dizinine yukleyin."
+              exit 1
